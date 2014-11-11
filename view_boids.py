@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('TkAgg')
 from boids import Boids
 from matplotlib import pyplot as plt
 from matplotlib import animation

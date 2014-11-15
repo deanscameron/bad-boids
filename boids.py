@@ -26,28 +26,37 @@ class Starling(Boid):
         super(Starling, self).__init__(x,y,xv,yv,owner)
         self.species = "Starling"
 
-    def flee_eagle(self, other):
+    def flee_eagle(self,other):
         return (self.seperation(other)*self.owner.eagle_fear)/self.seperation_sq(other)	
  
+    def fly_to_mid(self,other):
+	    return self.seperation(other)*self.owner.flock_attraction
+	
+    def avoid_nearby(self,other):
+        return self.seperation(other)
+	
+    def match_speed(self,other):
+        return (other.velocity-self.velocity)*self.owner.speed_matching_strength	
+	
     def interaction(self,other):
         delta_v=array([0.0,0.0])  	
-		
+
         if other.species=="Eagle":
             # Flee the Eagle
             if self.seperation_sq(other) < self.owner.eagle_avoidance_radius**2:
                 delta_v-=self.flee_eagle(other)
-               
+				
         else:
             # Fly towards the middle
-            delta_v+=self.seperation(other)*self.owner.flock_attraction
+            delta_v+=self.fly_to_mid(other)
             
             # Fly away from nearby boids
             if self.seperation_sq(other) < self.owner.avoidance_radius**2:
-                delta_v-=self.seperation(other)
+                delta_v-=self.avoid_nearby(other)
 
             # Try to match speed with nearby boids
             if self.seperation_sq(other) < self.owner.formation_flying_radius**2:
-                delta_v+=(other.velocity-self.velocity)*self.owner.speed_matching_strength
+                delta_v+=self.match_speed(other)
 
         return delta_v
 

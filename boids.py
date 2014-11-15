@@ -9,10 +9,17 @@ from numpy import array
 # Will now add an Eagle to Boids
 
 class Boid(object):
-    def __init__(self,x,y,xv,yv,owner,species="Starling"):
+    def __init__(self,x,y,xv,yv,owner,secies = "Starling"):
         self.position=array([x,y])
         self.velocity=array([xv,yv])
         self.owner=owner
+		
+    def seperation(self, other):
+        return other.position-self.position
+		
+    def seperation_sq(self, other):
+	    return (self.seperation(other)).dot(self.seperation(other))
+	    
 
 class Starling(Boid):
     def __init__(self,x,y,xv,yv,owner):
@@ -21,24 +28,22 @@ class Starling(Boid):
 
     def interaction(self,other):
         delta_v=array([0.0,0.0])
-        separation=other.position-self.position
-        separation_sq=separation.dot(separation)
- 
+         
         if other.species=="Eagle":
             # Flee the Eagle
-            if separation_sq < self.owner.eagle_avoidance_radius**2:
-                delta_v-=(separation*self.owner.eagle_fear)/separation.dot(separation)
+            if self.seperation_sq(other) < self.owner.eagle_avoidance_radius**2:
+                delta_v-=(self.seperation(other)*self.owner.eagle_fear)/self.seperation_sq(other)
                
         else:
             # Fly towards the middle
-            delta_v+=separation*self.owner.flock_attraction
+            delta_v+=self.seperation(other)*self.owner.flock_attraction
             
             # Fly away from nearby boids
-            if separation_sq < self.owner.avoidance_radius**2:
-                delta_v-=separation
+            if self.seperation_sq(other) < self.owner.avoidance_radius**2:
+                delta_v-=self.seperation(other)
 
             # Try to match speed with nearby boids
-            if separation_sq < self.owner.formation_flying_radius**2:
+            if self.seperation_sq(other) < self.owner.formation_flying_radius**2:
                 delta_v+=(other.velocity-self.velocity)*self.owner.speed_matching_strength
 
         return delta_v
@@ -50,11 +55,9 @@ class Eagle(Boid):
 
     def interaction(self,other):
         delta_v=array([0.0,0.0])
-        separation=other.position-self.position
-        separation_sq=separation.dot(separation)
             
         # Hunt the boids
-        delta_v+=separation*self.owner.eagle_hunt_strength
+        delta_v+=self.seperation(other)*self.owner.eagle_hunt_strength
 		
         return delta_v
 			

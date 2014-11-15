@@ -6,7 +6,6 @@ for use as an exercise on refactoring.
 import random
 from numpy import array
 
-# Will now add an Eagle to Boids
 
 class Boid(object):
     def __init__(self,x,y,xv,yv,owner):
@@ -41,23 +40,23 @@ class Starling(Boid):
     def interaction(self,other):
         delta_v=array([0.0,0.0])  	
         too_close_to_starling = self.seperation_sq(other) < self.owner.avoidance_radius**2
-		close_to_eagle = self.seperation_sq(other) < self.owner.eagle_avoidance_radius**2
-		flying_in_flock = self.seperation_sq(other) < self.owner.formation_flying_radius**2
+        close_to_eagle = self.seperation_sq(other) < self.owner.eagle_avoidance_radius**2
+        flying_in_flock = self.seperation_sq(other) < self.owner.formation_flying_radius**2
 		
         if other.species=="Eagle":
-            # Flee the Eagle
+            # Flee if Eagle nearby
             if close_to_eagle:
                 delta_v-=self.flee_eagle(other)
 				
         else:
-            # Fly towards the middle
+            # Fly towards the middle of the flock
             delta_v+=self.fly_to_mid(other)
             
-            # Fly away from nearby boids
+            # Fly away from nearby starlings in the flock
             if too_close_to_starling:
                 delta_v-=self.avoid_nearby(other)
 
-            # Try to match speed with nearby boids
+            # Try to match speed with the flock of starlings
             if flying_in_flock:
                 delta_v+=self.match_speed(other)
 
@@ -74,12 +73,12 @@ class Eagle(Boid):
     def interaction(self,other):
         delta_v=array([0.0,0.0])
             
-        # Hunt the boids
+        # Hunt the starlings
         delta_v+=self.hunt(other)
 		
         return delta_v
 			
-# Deliberately terrible code for teaching purposes
+
 class Boids(object):
     def __init__(self,
            flock_attraction,avoidance_radius,

@@ -26,13 +26,16 @@ class Starling(Boid):
         super(Starling, self).__init__(x,y,xv,yv,owner)
         self.species = "Starling"
 
+    def flee_eagle(self, other):
+        return (self.seperation(other)*self.owner.eagle_fear)/self.seperation_sq(other)	
+ 
     def interaction(self,other):
-        delta_v=array([0.0,0.0])
-         
+        delta_v=array([0.0,0.0])  	
+		
         if other.species=="Eagle":
             # Flee the Eagle
             if self.seperation_sq(other) < self.owner.eagle_avoidance_radius**2:
-                delta_v-=(self.seperation(other)*self.owner.eagle_fear)/self.seperation_sq(other)
+                delta_v-=self.flee_eagle(other)
                
         else:
             # Fly towards the middle

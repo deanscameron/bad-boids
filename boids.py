@@ -9,7 +9,7 @@ from numpy import array
 # Will now add an Eagle to Boids
 
 class Boid(object):
-    def __init__(self,x,y,xv,yv,owner,secies = "Starling"):
+    def __init__(self,x,y,xv,yv,owner):
         self.position=array([x,y])
         self.velocity=array([xv,yv])
         self.owner=owner
@@ -40,10 +40,13 @@ class Starling(Boid):
 	
     def interaction(self,other):
         delta_v=array([0.0,0.0])  	
-
+        too_close_to_starling = self.seperation_sq(other) < self.owner.avoidance_radius**2
+		close_to_eagle = self.seperation_sq(other) < self.owner.eagle_avoidance_radius**2
+		flying_in_flock = self.seperation_sq(other) < self.owner.formation_flying_radius**2
+		
         if other.species=="Eagle":
             # Flee the Eagle
-            if self.seperation_sq(other) < self.owner.eagle_avoidance_radius**2:
+            if close_to_eagle:
                 delta_v-=self.flee_eagle(other)
 				
         else:
@@ -51,11 +54,11 @@ class Starling(Boid):
             delta_v+=self.fly_to_mid(other)
             
             # Fly away from nearby boids
-            if self.seperation_sq(other) < self.owner.avoidance_radius**2:
+            if too_close_to_starling:
                 delta_v-=self.avoid_nearby(other)
 
             # Try to match speed with nearby boids
-            if self.seperation_sq(other) < self.owner.formation_flying_radius**2:
+            if flying_in_flock:
                 delta_v+=self.match_speed(other)
 
         return delta_v

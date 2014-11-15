@@ -65,11 +65,14 @@ class Eagle(Boid):
         super(Eagle, self).__init__(x,y,xv,yv,owner)
         self.species = "Eagle"
 
+    def hunt(self,other):
+	    return self.seperation(other)*self.owner.eagle_hunt_strength
+
     def interaction(self,other):
         delta_v=array([0.0,0.0])
             
         # Hunt the boids
-        delta_v+=self.seperation(other)*self.owner.eagle_hunt_strength
+        delta_v+=self.hunt(other)
 		
         return delta_v
 			
